@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket IO Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h3>Socket.IO Chat</h3>
+    <input id="msg" placeholder="Type a message" />
+    <button onclick="send()">Send</button>
+    <ul id="chat"></ul>
+    
+    <script>
+      const socket = io("ws://localhost:3000");
+
+      function getMessage(data) {
+        const chat = document.getElementById("chat");
+        const li = document.createElement("li");
+        li.innerText = `User ${data.userId} said: ${data.message}` ;
+        chat.appendChild(li);
+      }
+
+      socket.on("chat-message", (object)=>{
+        getMessage(object)
+      })
+
+      function send() {
+        const message = document.getElementById("msg").value;
+        socket.emit("chat-message", message)
+      }
+    </script>
+  </body>
+</html>
