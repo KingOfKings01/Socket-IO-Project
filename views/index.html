@@ -9,24 +9,40 @@
     <input id="msg" placeholder="Type a message" />
     <button onclick="send()">Send</button>
     <ul id="chat"></ul>
-    
+
     <script>
-      const socket = io("ws://localhost:3000");
+      document.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem("token");
+        const username = localStorage.getItem("username");
+
+        console.log(token, username);
+        
+        if (!token || !username) {
+          window.location.href = "./login";
+        }
+      });
+
+      const socket = io("ws://localhost:3000", {
+        auth: {
+          token: localStorage.getItem("token"),
+          name: localStorage.getItem("username"),
+        },
+      });
 
       function getMessage(data) {
         const chat = document.getElementById("chat");
         const li = document.createElement("li");
-        li.innerText = `User ${data.userId} said: ${data.message}` ;
+        li.innerText = `User ${data.userId} said: ${data.message}`;
         chat.appendChild(li);
       }
 
-      socket.on("chat-message", (object)=>{
-        getMessage(object)
-      })
+      socket.on("chat-message", (object) => {
+        getMessage(object);
+      });
 
       function send() {
         const message = document.getElementById("msg").value;
-        socket.emit("chat-message", message)
+        socket.emit("chat-message", message);
       }
     </script>
   </body>

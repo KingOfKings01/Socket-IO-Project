@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket IO Chat</title>
+  </head>
+  <body>
+
+    <center>
+      <h1>Sing In</h1>
+      <form method="post" id="auth-form">
+        <div>
+          <label for="username">Username:</label>
+          <input type="text" name="username" required />
+        </div>
+        <br>
+        
+        <div>
+          <label for="email">Email:</label>
+          <input type="email"name="email" required />
+        </div>
+        <br>
+        
+        <div>
+          <label for="password">Password:</label>
+          <input type="password"  name="password" required />
+        </div>
+        <br>
+        <button type="submit" >Sign In</button>
+      </form>
+      <br>
+      <div>Already have an account? <a href="./login">Login</a></div> 
+    </div>
+    
+  <!-- lib -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!-- APIs -->
+    <script>
+      async function singIn(data) {
+        try {
+          const response = await axios.post(
+            "http://localhost:3000/user/sing-in",
+            data
+          );
+          return response.data;
+        } catch (err) {
+          alert(err.message)
+        }
+      }
+    </script>
+
+    <!-- Dom and API calls -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const element = document.querySelector("#auth-form");
+        if (element) element.addEventListener("submit", handleAuthorization);
+      });
+
+      async function handleAuthorization(event) {
+        event.preventDefault();
+        const username = event.target.username.value
+        const email = event.target.email.value
+        const password = event.target.password.value;
+
+        try {
+          let  data = await singIn({username, email, password });
+          
+          success(data.token, data.username);
+        } catch (err) {
+          const message = err.message;
+          messenger(message, false);
+        }
+      }
+
+      function success(token, username) {
+        localStorage.setItem("token", JSON.stringify(token));
+        localStorage.setItem("username", JSON.stringify(username));
+        window.location.href = "/";
+      }
+    </script>
+  </body>
+</html>
