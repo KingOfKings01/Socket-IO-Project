@@ -6,7 +6,7 @@
   </head>
   <body>
     <h3>Socket.IO Chat</h3>
-    <input id="msg" placeholder="Type a message" />
+    <input id="msg" placeholder="Type a message here" />
     <button onclick="send()">Send</button>
     <ul id="chat"></ul>
 
@@ -14,8 +14,6 @@
       document.addEventListener("DOMContentLoaded", () => {
         const token = localStorage.getItem("token");
         const username = localStorage.getItem("username");
-
-        console.log(token, username);
         
         if (!token || !username) {
           window.location.href = "./login";
@@ -24,15 +22,14 @@
 
       const socket = io("ws://localhost:3000", {
         auth: {
-          token: localStorage.getItem("token"),
-          name: localStorage.getItem("username"),
+          token: localStorage.getItem("token")
         },
       });
 
       function getMessage(data) {
         const chat = document.getElementById("chat");
         const li = document.createElement("li");
-        li.innerText = `User ${data.userId} said: ${data.message}`;
+        li.innerText = `${data.username} said: ${data.message}`;
         chat.appendChild(li);
       }
 

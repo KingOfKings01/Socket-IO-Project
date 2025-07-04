@@ -1,5 +1,4 @@
-import User from "../models/User.js";
-
+const User = require('../models/User');
 const socketAuthMiddleware = async (socket, next) => {
   try {
     const token = socket.handshake.auth.token || socket.handshake.headers["authorization"];
@@ -25,4 +24,4 @@ const socketAuthMiddleware = async (socket, next) => {
   }
 };
 
-export default socketAuthMiddleware;
+module.exports = socketAuthMiddleware;

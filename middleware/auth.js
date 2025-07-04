@@ -1,4 +1,3 @@
-// const { User } = require("../relations/Relation");
 const User = require('../models/User');
 
 exports.verifyToken = async (req, res, next) => {
@@ -18,8 +17,7 @@ exports.verifyToken = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid or expired token" });
     }
     
-    // const user = await User.findByPk(decoded.id);
-    const user = await User.findById(decoded.id);
+    const user = await User.findByPk(decoded.id);
     
     if (!user) {
       return res.status(404).json({ message: "User not found" });
