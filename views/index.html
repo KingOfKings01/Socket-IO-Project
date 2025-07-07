@@ -2,44 +2,215 @@
 <html>
   <head>
     <title>Socket IO Chat</title>
+    <style>
+      :root {
+        --left-bg: #737373;
+        --left-color: #ffffff;
+
+        --right-bg: #1e90ff;
+        --right-color: #ffffff;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #2a91cc;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      header {
+        padding: 20px;
+        color: #fff;
+        background: #000;
+      }
+      main {
+        display: flex;
+        height: 88vh;
+        padding: 20px;
+
+        .left-sidebar {
+          padding: 5px 30px 20px 10px;
+          width: 40vw;
+          background: #2a91cc;
+
+          color: snow;
+
+          ul {
+            list-style: none;
+            padding: 10px 0;
+
+            li {
+              margin-bottom: 10px;
+            }
+          }
+        }
+
+        .right-dashboard {
+          padding: 20px;
+          border-radius: 10px;
+          background: snow;
+          width: 100%;
+
+          display: flex;
+          flex-direction: column;
+
+          #chat {
+            height: 70vh;
+            list-style: none;
+          }
+
+          #message-input {
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            input {
+              width: 100%;
+              padding: 10px;
+            }
+            button {
+              padding: 10px;
+            }
+          }
+        }
+
+        .messages-list {
+          display: flex;
+          flex-direction: column;
+          gap: 30px;
+          padding: 10px 0px;
+          height: 65vh;
+        }
+
+        .message-box {
+          min-width: 200px;
+          max-width: 400px;
+          padding: 20px;
+          height: 1.5rem;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+        }
+
+        .right {
+          align-self: flex-end;
+          background: var(--right-bg);
+
+          span {
+            color: var(--right-color);
+          }
+
+          &:after {
+            background: var(--right-bg);
+          }
+        }
+
+        .left {
+          align-self: flex-start;
+          background: var(--left-bg);
+
+          span {
+            color: var(--left-color);
+          }
+
+          &:after {
+            background: var(--left-bg);
+          }
+        }
+      }
+    </style>
     <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
-    <h3>Socket.IO Chat</h3>
-    <input id="msg" placeholder="Type a message here" />
-    <button onclick="send()">Send</button>
-    <ul id="chat"></ul>
+    <header>
+      <h3>Socket.IO Chat</h3>
+    </header>
+    <main>
+      <div class="left-sidebar">
+        <h3>Users online</h3>
+        <hr>
+        <ul>
+          <!-- previews searched group names and user-names -->
+        </ul>
+      </div>
+      <div class="right-dashboard">
+        <div id="chat">
+          <div class="messages-list"></div>
+
+          <form id="message-input" onsubmit="send(event)">
+            <input name="massage" placeholder="Type a message here" />
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      </div>
+    </main>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         const token = localStorage.getItem("token");
         const username = localStorage.getItem("username");
-        
+
         if (!token || !username) {
           window.location.href = "./login";
         }
+
+        const element = document.querySelector("#message-input input");
+        element.focus();
       });
 
       const socket = io("ws://localhost:3000", {
         auth: {
-          token: localStorage.getItem("token")
+          token: localStorage.getItem("token"),
         },
       });
 
-      function getMessage(data) {
-        const chat = document.getElementById("chat");
-        const li = document.createElement("li");
-        li.innerText = `${data.username} said: ${data.message}`;
-        chat.appendChild(li);
+      function getMessage({ username, message }) {
+        const chat = document.querySelector(".messages-list");
+        const div = document.createElement("div");
+        const span = document.createElement("span");
+        const myname = localStorage.getItem("username");
+        const clintName = username == myname ? "You" : username;
+        span.innerText = message;
+
+        const option = username == myname ? "right" : "left";
+
+        div.classList.add("message-box", option);
+
+        div.appendChild(span);
+        chat.appendChild(div);
       }
+
+      socket.on("online-users", (userList) => {
+        const ul = document.querySelector(".left-sidebar ul");
+        ul.innerHTML = ""; // clear previous list
+
+        const me = localStorage.getItem("username");
+
+        userList.forEach((username) => {
+          const li = document.createElement("li");
+          if (me != username) {
+            li.textContent = username;
+            ul.appendChild(li);
+          } else {
+            li.textContent = username + " (you)";
+            ul.insertBefore(li, ul.firstChild);
+          }
+        });
+      });
 
       socket.on("chat-message", (object) => {
         getMessage(object);
       });
 
-      function send() {
-        const message = document.getElementById("msg").value;
+      function send(event) {
+        event.preventDefault();
+        const message = event.target.massage.value;
         socket.emit("chat-message", message);
+        event.target.reset();
+
+        const element = document.querySelector("#message-input input");
+        element.focus();
       }
     </script>
   </body>

@@ -1,4 +1,3 @@
-// const { User, Order, Downloaded } = require("../relations/Relation");
 const User = require("../models/User");
 
 // Create a new User
@@ -40,6 +39,10 @@ exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
   console.log(req.body)
   try {
+    const users = await User.findAll();
+
+    console.log(users)
+
     const user = await User.findOne({ where: { email } });
 
     if (!user) {
