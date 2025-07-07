@@ -40,7 +40,9 @@
           ul {
             list-style: none;
             padding: 10px 0;
-
+            overflow-y: scroll;
+            scroll-behavior: smooth;
+            height: 100%;
             li {
               margin-bottom: 10px;
             }
@@ -81,6 +83,8 @@
           gap: 30px;
           padding: 10px 0px;
           height: 65vh;
+          overflow-y: scroll;
+          scroll-behavior: smooth;
         }
 
         .message-box {
@@ -129,7 +133,7 @@
     <main>
       <div class="left-sidebar">
         <h3>Users online</h3>
-        <hr>
+        <hr />
         <ul>
           <!-- previews searched group names and user-names -->
         </ul>
@@ -147,71 +151,75 @@
     </main>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const token = localStorage.getItem("token");
-        const username = localStorage.getItem("username");
+          document.addEventListener("DOMContentLoaded", () => {
+            const token = localStorage.getItem("token");
+            const username = localStorage.getItem("username");
 
-        if (!token || !username) {
-          window.location.href = "./login";
-        }
+            if (!token || !username) {
+              window.location.href = "./login";
+            }
 
-        const element = document.querySelector("#message-input input");
-        element.focus();
-      });
+            const element = document.querySelector("#message-input input");
+            element.focus();
+          });
 
-      const socket = io("ws://localhost:3000", {
-        auth: {
-          token: localStorage.getItem("token"),
-        },
-      });
+          const socket = io("ws://localhost:3000", {
+            auth: {
+              token: localStorage.getItem("token"),
+            },
+          });
 
-      function getMessage({ username, message }) {
-        const chat = document.querySelector(".messages-list");
-        const div = document.createElement("div");
-        const span = document.createElement("span");
-        const myname = localStorage.getItem("username");
-        const clintName = username == myname ? "You" : username;
-        span.innerText = message;
+          function getMessage({ username, message }) {
+            const chat = document.querySelector(".messages-list");
+            const div = document.createElement("div");
+            const span = document.createElement("span");
+            const myname = localStorage.getItem("username");
+            const clintName = username == myname ? "You" : username;
+            span.innerText = message;
 
-        const option = username == myname ? "right" : "left";
+            const option = username == myname ? "right" : "left";
 
-        div.classList.add("message-box", option);
+            div.classList.add("message-box", option);
 
-        div.appendChild(span);
-        chat.appendChild(div);
-      }
-
-      socket.on("online-users", (userList) => {
-        const ul = document.querySelector(".left-sidebar ul");
-        ul.innerHTML = ""; // clear previous list
-
-        const me = localStorage.getItem("username");
-
-        userList.forEach((username) => {
-          const li = document.createElement("li");
-          if (me != username) {
-            li.textContent = username;
-            ul.appendChild(li);
-          } else {
-            li.textContent = username + " (you)";
-            ul.insertBefore(li, ul.firstChild);
+            div.appendChild(span);
+            chat.appendChild(div);
           }
-        });
-      });
 
-      socket.on("chat-message", (object) => {
-        getMessage(object);
-      });
+          socket.on("online-users", (userList) => {
+            const ul = document.querySelector(".left-sidebar ul");
+            ul.innerHTML = ""; // clear previous list
 
-      function send(event) {
-        event.preventDefault();
-        const message = event.target.massage.value;
-        socket.emit("chat-message", message);
-        event.target.reset();
+            const me = localStorage.getItem("username");
 
-        const element = document.querySelector("#message-input input");
-        element.focus();
-      }
+            userList.forEach((username) => {
+              const li = document.createElement("li");
+              if (me != username) {
+                li.textContent = username;
+                ul.appendChild(li);
+              } else {
+                li.textContent = username + " (you)";
+                ul.insertBefore(li, ul.firstChild);
+              }
+            });
+          });
+
+          socket.on("chat-message", (object) => {
+            getMessage(object);
+          });
+
+          function send(event) {
+            event.preventDefault();
+            const message = event.target.massage.value;
+            socket.emit("chat-message", message);
+            event.target.reset();
+
+            const input = document.querySelector("#message-input input");
+            input.focus();
+
+            setTimeout(() => {
+        const element = document.querySelector(".messages-list");
+        element.scrollTop = element.scrollHeight;
+      }, 50)}
     </script>
   </body>
 </html>
